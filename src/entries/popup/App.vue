@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import HelloWorld from '@/components/HelloWorld.vue'
+onMounted(() => {
+  console.log('mounted')
+})
 </script>
 
 <template>

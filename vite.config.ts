@@ -20,9 +20,13 @@ export default defineConfig({
   },
   plugins: [
     vue(),
-
     AutoImport({
+      dts: true,
+      imports: ['vue'],
       resolvers: [ElementPlusResolver()],
+      eslintrc: {
+        enabled: true, // <-- this
+      },
     }),
     Components({
       resolvers: [ElementPlusResolver()],
