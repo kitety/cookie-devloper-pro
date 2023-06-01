@@ -10,12 +10,13 @@ const manifest: chrome.runtime.Manifest = {
     service_worker: 'src/entries/background/main.ts',
   },
   action: {
-    default_popup: 'src/entries/popup/index.html',
+    default_popup: 'src/entries/options/index.html',
   },
   options_ui: {
     page: 'src/entries/options/index.html',
-    open_in_tab: false,
+    open_in_tab: true,
   },
+  permissions: ['cookies'],
 }
 
 export default manifest
