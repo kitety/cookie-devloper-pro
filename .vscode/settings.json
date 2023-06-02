@@ -30,5 +30,7 @@
     "gitlens.codeLens.scopes": ["document"],
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
-  }
+  },
+  "vue.codeActions.enabled": false,
+  "files.eol": "\n"
 }

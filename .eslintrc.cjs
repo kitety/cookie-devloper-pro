@@ -13,7 +13,7 @@ const eslintConfig = {
     'plugin:vue/vue3-recommended',
     'plugin:vue/vue3-essential',
     'plugin:prettier/recommended',
-    './.eslintrc-auto-import.json',
+    '.eslintrc-auto-import.json',
   ],
   parser: 'vue-eslint-parser',
   parserOptions: {

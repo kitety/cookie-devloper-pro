@@ -22,7 +22,7 @@ export default defineConfig({
     vue(),
     AutoImport({
       dts: true,
-      imports: ['vue'],
+      imports: ['vue', '@vueuse/core'],
       resolvers: [ElementPlusResolver()],
       eslintrc: {
         enabled: true, // <-- this

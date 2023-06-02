@@ -1,10 +1,9 @@
-const urlRegex = /^(?:https?:\/\/)?(?:[^@\\/\n]+@)?(?:www\.)?([^:\\/?\n]+)/gim
-const getDomain = (str: string): string => {
+const getDomain = (inputStr: string): string => {
+  let str = inputStr.trim()
   if (!str) return ''
 
-  const isUrl = urlRegex.test(str)
   const isHaveProtocol = str.startsWith('http')
-  if (isUrl && isHaveProtocol) {
+  if (isHaveProtocol) {
     const url = new URL(str)
     str = url.hostname
   }
@@ -13,4 +12,5 @@ const getDomain = (str: string): string => {
   }
   return str
 }
+
 export default getDomain
