@@ -15,6 +15,7 @@ let allCookies: chrome.cookies.Cookie[] = []
 const activeName = ref('first')
 const transferDomain = ref('localhost')
 const activeCollapse = ref('1')
+const secure = ref(false)
 
 const search = reactive({
   domain: '',
@@ -116,6 +117,7 @@ const handleTransferData = async () => {
     const cookie = {
       ...item,
       domain,
+      secure: secure.value,
     }
     return saveCookie(cookie)
   })
@@ -305,6 +307,9 @@ const handleRecoverData = async () => {
             v-model="filterCookies.selectedAll"
             label="全部选择"
             size="large" />
+          <el-checkbox
+            v-model="secure"
+            label="secure" />
           <el-input
             v-model="transferDomain"
             placeholder="Domain"
