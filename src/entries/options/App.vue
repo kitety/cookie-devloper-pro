@@ -12,7 +12,7 @@ import getDomain from '@/utils/getDomain'
 
 let allCookies: chrome.cookies.Cookie[] = []
 
-const activeName = ref('fourth')
+const activeName = ref('first')
 const transferDomain = ref('localhost')
 const activeCollapse = ref('1')
 
@@ -61,7 +61,7 @@ onMounted(async () => {
   setTimeout(async () => {
     const url = await getCurrentUrl()
     search.domain = url
-  }, 300)
+  }, 200)
 })
 
 watchDebounced(

@@ -5,7 +5,7 @@
   "description": "a chrome extension dev template",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --force",
     "build": "vue-tsc && vite build",
     "preview": "vite preview"
   },
