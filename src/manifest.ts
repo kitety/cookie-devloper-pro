@@ -16,7 +16,7 @@ const manifest: chrome.runtime.Manifest = {
     page: 'src/entries/options/index.html',
     open_in_tab: true,
   },
-  permissions: ['cookies'],
+  permissions: ['cookies', 'tabs'],
 }
 
 export default manifest
