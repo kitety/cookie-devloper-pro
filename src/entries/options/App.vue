@@ -2,12 +2,8 @@
 import { SAME_SITES } from '@/constants/index'
 import { deleteCookie, getAllCookies, saveCookie } from '@/utils/cookies'
 import { generateCookieKey } from '@/utils/generateKey'
-import { getCurrentUrl } from '@/utils/getCurrentUrl'
-import {
-  decorateCookieName,
-  isNameDecorated,
-  getRealName,
-} from '@/utils/decorateCookieName'
+import { getCurrentUrl, currentTabJumpUrl } from '@/utils/getCurrentUrl'
+import { decorateCookieName, isNameDecorated } from '@/utils/decorateCookieName'
 import getDomain from '@/utils/getDomain'
 
 let allCookies: chrome.cookies.Cookie[] = []
@@ -36,7 +32,6 @@ const fetchCookies = async () => {
 }
 const reloadData = () => {
   const domain = getDomain(search.domain)
-  console.log('domain', domain)
   const nameValue = String(search.name).toLowerCase()
   const domainValue = String(domain).toLowerCase()
   const data = allCookies.filter((item) => {
@@ -44,7 +39,6 @@ const reloadData = () => {
     const nameRight = String(item.name).toLowerCase().includes(nameValue)
     return domainRight && nameRight
   })
-  console.log('data', data)
   filterCookies.data = data.map((cookie) => {
     const key = generateCookieKey(cookie)
     return {
@@ -58,11 +52,11 @@ const reloadData = () => {
 }
 
 onMounted(async () => {
-  await fetchCookies()
   setTimeout(async () => {
     const url = await getCurrentUrl()
     search.domain = url
-  }, 200)
+    await fetchCookies()
+  }, 0)
 })
 
 watchDebounced(
@@ -77,16 +71,8 @@ watch([() => filterCookies.selectedAll], () => {
     item.checked = filterCookies.selectedAll
   })
 })
-watchEffect(() => {
-  console.log('filterCookies.data', filterCookies.data)
-})
-
-const handleClick = () => {
-  console.log(111)
-}
 
 const saveData = async (data: chrome.cookies.Cookie) => {
-  console.log('进入data', data)
   await deleteCookie(data)
   await saveCookie(data)
   ElMessage({
@@ -161,32 +147,45 @@ const handleExpireData = async () => {
   })
   reloadAllData()
 }
-const handleRecoverData = async () => {
-  const data = filterCookies.data.filter((item) => {
-    const { name, checked } = item
-    const nameNotDecorated = isNameDecorated(name)
-    return checked && nameNotDecorated
-  })
-  const saveDataPromise = data.map((item) => {
-    const name = getRealName(item.name)
-    const cookie = {
-      ...item,
-      name,
-    }
-    return saveCookie(cookie)
-  })
-  await Promise.all(saveDataPromise)
-  ElMessage({
-    message: 'success',
-    type: 'success',
-  })
-  reloadAllData()
+const jumpUrl = async (type: number) => {
+  const url = await getCurrentUrl()
+  const urlObject = new URL(url)
+  urlObject.port = ''
+  switch (type) {
+    case 0:
+      {
+        urlObject.protocol = 'http:'
+        urlObject.hostname = 'localhost'
+        urlObject.port = '8220'
+      }
+      break
+    case 3:
+      urlObject.hostname = 'www.newegg3.org'
+      break
+    case 4:
+      urlObject.hostname = 'www.newegg4.org'
+      break
+    case 6:
+      urlObject.hostname = 'www.newegg6.org'
+      break
+    case 7:
+      urlObject.hostname = 'e11wwwtest.newegg.com'
+      break
+    case 8:
+      urlObject.hostname = 'newegg.com'
+      break
+
+    default:
+      break
+  }
+
+  const newUrl = urlObject.toString()
+  currentTabJumpUrl(newUrl)
 }
 </script>
 
 <template>
   <h1>Cookie Developer Pro</h1>
-  {{ filterCookies.data.length }}
   <el-form
     :inline="true"
     :model="search"
@@ -211,7 +210,6 @@ const handleRecoverData = async () => {
     v-model="activeName"
     type="border-card"
     class="demo-tabs"
-    @tab-click="handleClick"
   >
     <el-tab-pane
       label="编辑"
@@ -563,133 +561,42 @@ const handleRecoverData = async () => {
       </el-collapse></el-tab-pane
     >
     <el-tab-pane
-      label="恢复"
+      label="跳转"
       name="fourth"
     >
-      <el-row :gutter="20">
-        <el-col :span="16">
-          <el-checkbox
-            v-model="filterCookies.selectedAll"
-            label="全部选择"
-            size="large"
-          />
-        </el-col>
-        <el-col :span="8">
-          <el-button
-            type="primary"
-            @click="handleRecoverData"
-            >恢复</el-button
-          ></el-col
+      <el-button-group class="ml-4">
+        <el-button
+          type="primary"
+          @click="jumpUrl(0)"
+          >LOCALHOST</el-button
         >
-      </el-row>
-
-      <el-collapse accordion>
-        <el-collapse-item
-          v-for="data in filterCookies.data"
-          :key="data.key"
-          :title="data.name"
+        <el-button
+          type="primary"
+          @click="jumpUrl(3)"
+          >ENV3</el-button
         >
-          <template #title>
-            {{ data.name }}
-            <el-checkbox
-              v-model="data.checked"
-              size="large"
-              @click.stop
-            />
-          </template>
-          <div>
-            <div>Value</div>
-            <div>
-              <el-input
-                v-model="data.value"
-                disabled
-              ></el-input>
-            </div>
-            <div>Domain</div>
-            <div>
-              <el-input
-                v-model="data.domain"
-                disabled
-              ></el-input>
-            </div>
-            <div>Path</div>
-            <div>
-              <el-input
-                v-model="data.path"
-                disabled
-              ></el-input>
-            </div>
-            <div v-if="data.expirationDate">
-              <div>expirationDate</div>
-              <div>
-                <el-date-picker
-                  v-model="data.expirationDate"
-                  disabled
-                  editable
-                  type="datetime"
-                  size="small"
-                  format="YYYY/MM/DD hh:mm:ss"
-                  value-format="X"
-                />
-              </div>
-            </div>
-            <div>SameSite</div>
-            <div>
-              <el-select
-                v-model="data.sameSite"
-                disabled
-                class="m-2"
-                placeholder="Select"
-                size="small"
-              >
-                <el-option
-                  v-for="item in SAME_SITES"
-                  :key="item"
-                  :label="item"
-                  :value="item"
-                />
-              </el-select>
-            </div>
-            <div>
-              <el-checkbox
-                v-model="data.hostOnly"
-                disabled
-                label="hostOnly"
-                size="small"
-              />
-              <el-checkbox
-                v-model="data.session"
-                disabled
-                label="session"
-                size="small"
-              />
-              <el-checkbox
-                v-model="data.secure"
-                disabled
-                label="安全"
-                size="small"
-              />
-              <el-checkbox
-                v-model="data.httpOnly"
-                disabled
-                label="httpOnly"
-                size="small"
-              />
-            </div>
-            <!-- <el-button
-              type="primary"
-              @click="saveData(data)"
-              >保存</el-button
-            >
-            <el-button
-              type="danger"
-              @click="deleteData(data)"
-              >删除</el-button
-            > -->
-          </div>
-        </el-collapse-item>
-      </el-collapse></el-tab-pane
-    >
+        <el-button
+          type="primary"
+          @click="jumpUrl(4)"
+          >ENV4</el-button
+        >
+        <el-button
+          type="primary"
+          @click="jumpUrl(6)"
+          >ENV6</el-button
+        >
+        <el-button
+          type="primary"
+          @click="jumpUrl(7)"
+          >PRE</el-button
+        >
+        <el-button
+          type="primary"
+          @click="jumpUrl(8)"
+          >PRD</el-button
+        >
+      </el-button-group>
+    </el-tab-pane>
   </el-tabs>
 </template>
 

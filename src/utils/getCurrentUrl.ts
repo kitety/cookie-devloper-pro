@@ -6,3 +6,10 @@ export const getCurrentUrl = () => {
     })
   })
 }
+export const currentTabJumpUrl = (url: string) => {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    if (tabs[0].id) {
+      chrome.tabs.update(tabs[0].id, { url })
+    }
+  })
+}
